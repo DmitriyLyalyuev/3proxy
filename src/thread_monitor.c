@@ -57,12 +57,8 @@ void * thread_monitor(void *p) {
                     reported_count, actual_count);
             srv->childcount = actual_count;
             
-            /* Create a temporary client param for logging */
-            struct clientparam tempparam;
-            memset(&tempparam, 0, sizeof(struct clientparam));
-            tempparam.srv = srv;
-            
-            if (!srv->silent) dolog(&tempparam, buf);
+            /* Use default logging instead of creating a temporary param */
+            if (!srv->silent) dolog(NULL, buf);
         }
         pthread_mutex_unlock(&srv->counter_mutex);
     }
