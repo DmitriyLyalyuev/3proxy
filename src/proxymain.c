@@ -7,6 +7,7 @@
 */
 
 #include "proxy.h"
+#include "thread_monitor.h"
 
 #define param ((struct clientparam *) p)
 #ifdef _WIN32
@@ -747,6 +748,11 @@ int MODULEMAINFUNC (int argc, char** argv){
  pthread_attr_setdetachstate(&pa,PTHREAD_CREATE_DETACHED);
 #endif
 
+ /* Start the thread monitor */
+ if (start_thread_monitor(&srv) != 0 && !srv.silent) {
+    dolog(&defparam, (unsigned char *)"Failed to start thread monitor");
+ }
+
  for (;;) {
 	for(;;){
 		while((conf.paused == srv.paused && srv.childcount >= srv.maxchild)){
@@ -944,6 +950,9 @@ int MODULEMAINFUNC (int argc, char** argv){
  pthread_mutex_unlock(&config_mutex);
 #endif
 
+ /* Stop the thread monitor before exiting */
+ stop_thread_monitor();
+ 
  if(!srv.silent) srv.logfunc(&defparam, (unsigned char *)"Exiting thread");
  srvfree(&srv);
 
